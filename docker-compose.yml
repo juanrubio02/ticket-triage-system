@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    container_name: ticket-triage-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DB_URL=sqlite:////app/data/data.db
+    volumes:
+      - ticket_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  ticket_data:
