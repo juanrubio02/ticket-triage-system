@@ -1,53 +1,48 @@
-# Ticket Triage System (Rules → LLM → Human Review)
+# Ticket Triage System — Rules → LLM → Human Review
 
-Sistema de clasificación y enrutado de tickets pensado como en empresa:
-- **Reglas primero** (rápido, barato y controlable)
-- **LLM solo cuando hace falta** (JSON estricto + validación)
-- **Human-in-the-loop** para revisión cuando la IA interviene o el riesgo es alto
-- **Idempotencia real** por `X-Request-Id` (evita duplicados en reintentos)
+Sistema backend de clasificación y enrutado de tickets, diseñado con criterios reales de empresa:
+control de costes, fiabilidad, explicabilidad y revisión humana.
 
-## Flujo (arquitectura)
-1) `POST /tickets` recibe el ticket
-2) Clasificación:
-   - `rules` → si no hay match, `llm` → si falla, `fallback`
-3) Si `source=llm` o `risk=high` → `needs_review=true`
-4) `POST /tickets/{id}/review` marca como revisado por humano
+## Qué demuestra este proyecto
+- Diseño de sistemas con **IA aplicada de forma responsable**
+- Uso de **reglas antes que LLM** (coste, latencia, control)
+- **Idempotencia real** para evitar duplicados en reintentos
+- **Human-in-the-loop** cuando la IA interviene o hay riesgo
+- Arquitectura limpia, modular y dockerizada
 
-## Endpoints
-- `GET /health`
-- `POST /tickets`
-- `GET /tickets/{ticket_id}`
-- `POST /tickets/{ticket_id}/review`
+---
 
-## Ejecutar con Docker
-```bash
-cp .env.example .env
-# Edita .env y añade tu LLM_API_KEY
-docker compose up --build
+## Flujo de clasificación
+1. `POST /tickets` recibe el ticket
+2. Clasificación:
+   - Reglas deterministas (`rules`)
+   - Si no hay match → LLM
+   - Si falla → fallback seguro
+3. Si `source=llm` o `risk=high` → `needs_review=true`
+4. Un humano revisa con `POST /tickets/{id}/review`
 
-# Ticket Triage System (Rules → LLM → Human Review)
+---
 
-Sistema de clasificación y enrutado de tickets pensado como en empresa:
-- **Reglas primero** (rápido, barato y controlable)
-- **LLM solo cuando hace falta** (JSON estricto + validación)
-- **Human-in-the-loop** para revisión cuando la IA interviene o el riesgo es alto
-- **Idempotencia real** por `X-Request-Id` (evita duplicados en reintentos)
+## Endpoints principales
+- `GET /health` — estado del servicio
+- `POST /tickets` — creación de ticket (idempotente)
+- `GET /tickets/{ticket_id}` — consulta de ticket
+- `POST /tickets/{ticket_id}/review` — revisión humana
+- `GET /stats` — métricas operativas básicas
 
-## Flujo (arquitectura)
-1) `POST /tickets` recibe el ticket
-2) Clasificación:
-   - `rules` → si no hay match, `llm` → si falla, `fallback`
-3) Si `source=llm` o `risk=high` → `needs_review=true`
-4) `POST /tickets/{id}/review` marca como revisado por humano
+---
 
-## Endpoints
-- `GET /health`
-- `POST /tickets`
-- `GET /tickets/{ticket_id}`
-- `POST /tickets/{ticket_id}/review`
+## Métricas (`/stats`)
+Ejemplo de datos expuestos:
+- Total de tickets
+- Distribución por categoría
+- Distribución por fuente
+- Tickets pendientes de revisión humana
+
+---
 
 ## Ejecutar con Docker
 ```bash
 cp .env.example .env
-# Edita .env y añade tu LLM_API_KEY
+# Añade tu LLM_API_KEY en .env
 docker compose up --build
