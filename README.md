@@ -1,48 +1,56 @@
 # Ticket Triage System — Rules → LLM → Human Review
 
-Sistema backend de clasificación y enrutado de tickets, diseñado con criterios reales de empresa:
-control de costes, fiabilidad, explicabilidad y revisión humana.
+Backend system for ticket classification and routing, designed with real-world
+enterprise constraints in mind: cost control, reliability, explainability and
+human oversight.
 
-## Qué demuestra este proyecto
-- Diseño de sistemas con **IA aplicada de forma responsable**
-- Uso de **reglas antes que LLM** (coste, latencia, control)
-- **Idempotencia real** para evitar duplicados en reintentos
-- **Human-in-the-loop** cuando la IA interviene o hay riesgo
-- Arquitectura limpia, modular y dockerizada
+## What this project demonstrates
 
----
+- Applied AI system design (LLM as a component, not the whole system)
+- Rules-first approach before LLM (cost, latency, control)
+- Idempotent APIs to prevent duplicates on retries
+- Human-in-the-loop workflow for AI-assisted decisions
+- Clean, modular and dockerized backend architecture
+- Basic operational metrics for observability
 
-## Flujo de clasificación
-1. `POST /tickets` recibe el ticket
-2. Clasificación:
-   - Reglas deterministas (`rules`)
-   - Si no hay match → LLM
-   - Si falla → fallback seguro
-3. Si `source=llm` o `risk=high` → `needs_review=true`
-4. Un humano revisa con `POST /tickets/{id}/review`
+## Classification flow
 
----
+1. `POST /tickets` receives a new ticket
+2. Classification pipeline:
+   - Deterministic rules
+   - If no match → LLM
+   - If LLM fails → safe fallback
+3. If `source=llm` or `risk=high` → `needs_review=true`
+4. Human review via `POST /tickets/{id}/review`
 
-## Endpoints principales
-- `GET /health` — estado del servicio
-- `POST /tickets` — creación de ticket (idempotente)
-- `GET /tickets/{ticket_id}` — consulta de ticket
-- `POST /tickets/{ticket_id}/review` — revisión humana
-- `GET /stats` — métricas operativas básicas
+## Main endpoints
 
----
+- `GET /health` — service health check
+- `POST /tickets` — create ticket (idempotent)
+- `GET /tickets/{ticket_id}` — retrieve ticket
+- `POST /tickets/{ticket_id}/review` — human review
+- `GET /stats` — operational metrics
 
-## Métricas (`/stats`)
-Ejemplo de datos expuestos:
-- Total de tickets
-- Distribución por categoría
-- Distribución por fuente
-- Tickets pendientes de revisión humana
+## Metrics (`/stats`)
 
----
+Exposes basic operational data:
+- Total tickets processed
+- Distribution by category
+- Distribution by source
+- Tickets pending human review
 
-## Ejecutar con Docker
+## Design decisions (why this way)
+
+- **Rules before LLM**: predictable, cheap and auditable
+- **LLM as fallback**: only used when deterministic logic fails
+- **Idempotency via request_id**: consistency under retries
+- **Human-in-the-loop**: required when AI intervenes or risk is elevated
+- **SQLite + Docker volume**: simple, portable, production-like setup
+- **Explicit logging and metrics**: observability by design
+
+## Running with Docker
+
 ```bash
 cp .env.example .env
-# Añade tu LLM_API_KEY en .env
+# Add your LLM_API_KEY to .env
 docker compose up --build
