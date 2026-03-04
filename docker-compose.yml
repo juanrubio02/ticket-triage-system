@@ -1,6 +1,20 @@
-version: "3.9"
-
 services:
+  db:
+    image: postgres:16
+    container_name: ticket-triage-db
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: ticket_triage
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d ticket_triage"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
   api:
     build: .
     container_name: ticket-triage-api
@@ -9,10 +23,15 @@ services:
     env_file:
       - .env
     environment:
-      - DB_URL=sqlite:////app/data/data.db
-    volumes:
-      - ticket_data:/app/data
+      # OJO: deja SOLO UNA de estas dos, según tu código:
+      # Si tu código lee DB_URL:
+      - DB_URL=postgresql+psycopg://app:app@db:5432/ticket_triage
+      # Si tu código lee DATABASE_URL, cambia la línea anterior por:
+      # - DATABASE_URL=postgresql+psycopg://app:app@db:5432/ticket_triage
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:
-  ticket_data:
+  pgdata:

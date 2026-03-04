@@ -1,3 +1,4 @@
+alembic>=1.13
 annotated-doc==0.0.4
 annotated-types==0.7.0
 anyio==4.12.1
@@ -22,3 +23,4 @@ tqdm==4.67.1
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 uvicorn==0.40.0
+psycopg[binary]>=3.1

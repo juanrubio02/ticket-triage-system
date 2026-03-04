@@ -1,17 +1,15 @@
-from __future__ import annotations
-
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-import os
+DB_URL = os.getenv("DB_URL", "sqlite:////app/data/data.db")
 
-DB_URL = os.getenv("DB_URL", "sqlite:///./data/data.db")
+engine_kwargs = {"pool_pre_ping": True}
 
+# SQLite needs this, Postgres must NOT receive it
+if DB_URL.startswith("sqlite"):
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
 
+engine = create_engine(DB_URL, **engine_kwargs)
 
-engine = create_engine(
-    DB_URL, connect_args={"check_same_thread": False}
-)
-SessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, bind=engine
-)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
