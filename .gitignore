@@ -9,6 +9,7 @@ venv/
 # Env
 .env
 .env.*
+!.env.example
 
 # Runtime data
 data/
@@ -17,4 +18,3 @@ data/
 # IDE
 .vscode/
 .idea/
-
